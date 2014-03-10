@@ -1,0 +1,53 @@
+---
+id: speech
+layout: demo
+title: Speech
+---
+<div>
+    <h2>Speech</h2>
+    <fieldset class="desc">
+        <div class="row">
+            <p class="normalText">
+                The <pre>speech</pre> command allows you to have the device vocalize any provided text input and also accept any voice input from the user to be returned as text. 
+            </p>
+        </div>
+        <div class="row shown-xs">
+{% highlight javascript %}
+bridgeit.speech( 'myId', 
+  callback, 
+   {text: 'Why is the sky blue?',
+    respond: true});
+{% endhighlight %}
+        </div>
+        <div class="row hidden-xs">
+{% highlight javascript %}
+bridgeit.speech( 'myId', callback, {text: 'Why is the sky blue?', respond: true});
+{% endhighlight %}
+        </div>
+    </fieldset>
+    
+    <label>Ask a question:
+        <input type="text" id="question" value="Why is the sky blue?"/>
+    </label>
+    <a id="cameraBtn" type="button" class="btn" onclick="askQuestion()">Ask BridgeIt</a>
+    
+    <div class="row"><p class="normalText">Answer:</p></div>    
+    <fieldset id="answers">
+    </fieldset>
+    <script type="text/javascript">
+    function askQuestion(){
+        bridgeit.speech('voiceBtn','onAfterSpeech', {text: document.getElementById('question').value, respond: true});
+    }
+    function onAfterSpeech(event)  {
+        console.log('onAfterSpeech: ' + JSON.stringify(event));
+        var answer = event.value;
+        if (answer)  {
+            var row = document.createElement('div');
+            row.setAttribute('class','row');
+            var elem = document.getElementById('answers');
+            elem.insertBefore(row,elem.firstChild);
+            row.innerHTML = answer;
+        }
+    }
+    </script>
+</div>

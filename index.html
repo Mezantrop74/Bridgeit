@@ -24,78 +24,154 @@ title: Mobile Demo
                       document.getElementById('splash').style.display = 'block';
                   } 
                }
+               function onAfterAskDemo(evt){
+                  var commandAliases = ['photo','picture', 
+                        'movie','recording','video', 
+                        'contact','list','address','person','email',
+                        'geo','address',
+                        'aug','augmented reality','reality','augment',
+                        'text','message',
+                        'cloud push','push','realtime',
+                        'talk','speech',
+                        'doc','api',
+                        'forum','question'];
+                    if( evt.value ){
+                        var demo = evt.value.toLowerCase();
+                        if( demo.indexOf('quit') > -1 ) return;
+                        if( !bridgeit.commands.some( function (el){ return demo.indexOf(el) > -1  }) 
+                            && !commandAliases.some( function(el){ return demo.indexOf(el) > -1} ) ){
+                            bridgeit.speech('1', 'onAfterAskDemo', {text: "Sorry, I didn't catch that. You can just say quit to go back.", respond: true});
+                        }
+                        else{
+                            
+                            $('#voice-command').html('...'+demo);
+                            var fired = false;
+                            bridgeit.commands.forEach( function(el){ 
+                                if( demo.indexOf(el) > -1 ){ 
+                                    console.log('trying nav to ' + el);
+                                    $('#'+el.toLowerCase()).click();
+                                    fired = true;
+                                    return false;
+                                }
+                            });
+                            if( !fired ){
+                                if( ['photo','picture'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                    $('#camera').click();
+                                }
+                                else if( ['video','movie','recording'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                    $('#camcorder').click();
+                                }
+                                else if( ['contact','list','address','person','email'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                    $('#fetchcontact').click();
+                                }
+                                else if( ['geo','address'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                    $('#geotrack').click();
+                                }
+                                else if( ['reality','augment'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                     $('#aug').click();
+                                }
+                                else if( ['text','message'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                    $('#sms').click();
+                                }
+                                else if( ['cloud','realtime'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                    $('#push').click();
+                                }
+                                else if( ['talk','speech'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                    $('#geotrack').click();
+                                }
+                                else if( ['doc','api'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                    $('#docs').click();
+                                }
+                                else if( ['forum','question'].some( function(el){ return demo.indexOf(el) > -1; } )){
+                                    $('#forums').click();
+                                }
+
+                            }
+                        }       
+                    }
+                }
+
                </script>
         </div>
     </div>
     <ul data-role="listview" data-inset="false" id="menu" class="menu" id="menu">
         <li>
-          <a href="camera.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+            <a style="background-color: #FFF8AD" onclick="bridgeit.speech('1', 'onAfterAskDemo', {question: 'Hey good looking, what demo would you like to see?'});">Tell BridgeIt where you'd like to go<span id="voice-command"></span></a>
+        </li>
+        <li>
+          <a id="camera" href="camera.html" data-transition="slide" onclick="$('.splash').fadeOut();">
             <i class="icon-camera"></i>Camera
           </a><i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="camcorder.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+          <a id="camcorder" href="camcorder.html" data-transition="slide" onclick="$('.splash').fadeOut();">
             <i class="icon-facetime-video"></i>Camcorder
           </a><i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="scan.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+          <a id="scan" href="scan.html" data-transition="slide" onclick="$('.splash').fadeOut();">
             <i class="icon-qrcode"></i>Scan
           </a>
           <i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="microphone.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+          <a id="microphone" href="microphone.html" data-transition="slide" onclick="$('.splash').fadeOut();">
             <i class="icon-microphone"></i>Microphone
           </a>
           <i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="contact-list.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+          <a id="fetchcontact" href="contact-list.html" data-transition="slide" onclick="$('.splash').fadeOut();">
             <i class="icon-calendar-empty"></i>
             <i style="font-style:normal;position:absolute;margin-left: -32px;font-size: 9px;margin-top: 7px;">@</i>Contact List
           </a>
           <i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="geotrack.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+          <a id="geotrack" href="geotrack.html" data-transition="slide" onclick="$('.splash').fadeOut();">
             <i class="icon-location-arrow"></i>GeoTrack
           </a>
           <i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="augmented-reality.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+          <a id="aug" href="augmented-reality.html" data-transition="slide" onclick="$('.splash').fadeOut();">
             <i class="augmented-reality-icon"></i>Augmented Reality
           </a>
           <i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="sms.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+          <a id="sms" href="sms.html" data-transition="slide" onclick="$('.splash').fadeOut();">
             <i class="icon-comment"></i>SMS
           </a>
           <i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="cloud-push.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+          <a id="push" href="cloud-push.html" data-transition="slide" onclick="$('.splash').fadeOut();">
             <i class="icon-cloud-download"></i>Cloud Push
           </a>
           <i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="http://bridgeit.github.io/bridgeit.js/docs/" data-rel="external" data-ajax="false"
+          <a id="speech" href="speech.html" data-transition="slide" onclick="$('.splash').fadeOut();">
+            <i class="icon-bullhorn"></i>Speech
+          </a>
+          <i class="icon-chevron-right"></i>
+        </li>
+        <li>
+          <a id="docs" href="http://bridgeit.github.io/bridgeit.js/docs/" data-rel="external" data-ajax="false"
             target="_blank">
             <i class="icon-book"></i>Documentation
           </a>
           <i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="http://bridgeit.mobi/forum/" data-rel="external" data-ajax="false" target="_blank">
+          <a id="forums" href="http://bridgeit.mobi/forum/" data-rel="external" data-ajax="false" target="_blank">
             <i class="icon-comments-alt"></i>Forums
           </a>
           <i class="icon-chevron-right"></i>
         </li>
         <li>
-          <a href="http://bridgeit.mobi/" data-rel="external" data-ajax="false" target="_blank">
+          <a id="about" href="http://bridgeit.mobi/" data-rel="external" data-ajax="false" target="_blank">
             <i class="icon-info-sign"></i>About
           </a>
           <i class="icon-chevron-right"></i>
