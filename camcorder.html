@@ -22,7 +22,7 @@ bridgeit.camcorder('myId', callback, {postURL: '/upload'});
     </fieldset>
     
     <a id="camcorderBtn" type="button" class="btn"
-        onclick="bridgeit.camcorder('camcorderBtn','onAfterVideoCapture', {postURL: window.echoHub + 'blob'});">Record a Video</a>
+        onclick="launchCamcorder();">Record a Video</a>
         
     <fieldset id="videoThumbnailField" style="display:none">
         <div class="row">
@@ -45,13 +45,19 @@ bridgeit.camcorder('myId', callback, {postURL: '/upload'});
             row.setAttribute('class','row');
             videosElem.appendChild(row);
             var vid = document.createElement('video');
-            vid.setAttribute('src', videos[i]);
+            vid.setAttribute('src', videos[i] + '?access_token=' + bridgeit.io.auth.getLastAccessToken());
             vid.setAttribute('controls', 'controls');
             vid.setAttribute('preload', 'auto');
             vid.setAttribute('type', 'video/mp4');
             vid.setAttribute('webkit-playsinline', 'yes');
             row.appendChild(vid);
         }
+    }
+
+    function launchCamcorder(){
+        bridgeit.camcorder('camcorderBtn','onAfterVideoCapture', {
+            postURL: window.storageHub + '?access_token=' + bridgeit.io.auth.getLastAccessToken()
+        });
     }
 
     function onAfterVideoCapture(event)  {
@@ -62,12 +68,14 @@ bridgeit.camcorder('myId', callback, {postURL: '/upload'});
         }
         console.log('handleVideo response: ' + event.response);
         if (event.response)  {
-            var video = JSON.parse(event.response);
+            var cleanResponse = event.response.replace(/\+/g,'');
+            var jsonResp = JSON.parse(cleanResponse);
             var row = document.createElement('div');
             row.setAttribute('class','row');
             var elem = document.getElementById('videos');
             elem.insertBefore(row,elem.firstChild);
-            row.innerHTML = "<a class='btn ui-btn ui-shadow ui-btn-corner-all ui-btn-up-c' onclick=\"loadVideo(this,'" + video + "');\">Load Video</a>";
+            row.innerHTML = "<a class='btn ui-btn ui-shadow ui-btn-corner-all ui-btn-up-c' onclick=\"loadVideo(this,'" +  
+                (jsonResp.uri || jsonResp.location ) + "');\">Load Video</a>";
         }
     }
     function loadVideo(videoLink, url){
@@ -75,7 +83,7 @@ bridgeit.camcorder('myId', callback, {postURL: '/upload'});
             var parent = videoLink.parentNode;
             parent.removeChild(videoLink);
             var vid = document.createElement('video');
-            vid.setAttribute('src',  url);
+            vid.setAttribute('src',  url + '?access_token=' + bridgeit.io.auth.getLastAccessToken());
             vid.setAttribute('controls', 'controls');
             vid.setAttribute('preload', 'auto');
             vid.setAttribute('type', 'video/mp4');

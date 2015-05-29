@@ -1,7 +1,43 @@
-window.echoHub = 'http://api.bridgeit.mobi/echo/';
-window.pushHub = 'http://api.bridgeit.mobi/push/';
-window.apiKey = '197EBF31-40CD-444F-826F-10158A0F3581';
+window.bridgeitHostname = 'api.bridgeit.mobi';
+window.bridgeitHost = 'http://' + bridgeitHostname;
+window.storageHub = bridgeitHost + '/storage/bridgeit_demo/realms/demo/blobs';
+window.docsHub = bridgeitHost + '/docs/bridgeit_demo/realms/demo/';
+window.pushHub = bridgeitHost + '/push/';
+window.authHub = bridgeitHost + '/auth/';
+
+window.account = 'bridgeit_demo';
+window.realm = 'demo';
+window.user = 'demo_user';
+window.secret = 'password';
+
+
 bridgeit.overrideAugmentedRealityAlphaLevel = true; //allow Augmented Reality on Android for the public demos
+
+//check login
+if( !bridgeit.io.auth.isLoggedIn() ){
+    bridgeit.io.auth.connect({
+        host: bridgeitHostname,
+        account: account,
+        realm: realm,
+        username: user,
+        password: secret,
+        usePushService: true
+    }).then(function(){
+        bridgeit.usePushService(window.pushHub, null, 
+            {
+                auth:{
+                    access_token: bridgeit.io.auth.getLastAccessToken()
+                },
+                account: account, 
+                realm: realm
+            }
+        );
+        console.log('successfully logged in to bridgeit services, demo is ready');
+    })['catch'](function(err){
+        alert('Uh oh, we haz broken demo: ' + (err ? err.message : err) );
+        throw err;
+    });
+}
 
 bridgeit.launchFailed = function(){
     document.getElementById('appStoreLink').href = bridgeit.appStoreURL();

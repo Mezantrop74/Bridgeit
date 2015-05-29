@@ -127,7 +127,15 @@ bridgeit.push('myPushGroup', {subject: 'subject', detail: 'detail'});
     var cloudPushReady;
     
     if (!cloudPushReady)  {
-        bridgeit.usePushService( window.pushHub, window.apiKey);
+        bridgeit.usePushService(window.pushHub, null, 
+            {
+                auth:{
+                    access_token: bridgeit.io.auth.getLastAccessToken()
+                },
+                account: account, 
+                realm: realm
+            }
+        );
         bridgeit.addPushListener(bridgeit.getId(), 'handlePush');
         cloudPushReady = true;
     }

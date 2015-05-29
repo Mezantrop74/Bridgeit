@@ -22,7 +22,7 @@ bridgeit.camera( 'myId', callback, {postURL: '/upload'});
     </fieldset>
     
     <a id="cameraBtn" type="button" class="btn"
-        onclick="bridgeit.camera('cameraBtn','onAfterPhotoCapture', {postURL:window.echoHub + 'blob'});">Take a Photo</a>
+        onclick="launchCamera();">Take a Photo</a>
         
     <fieldset id="currentPhoto">
         <div class="row">
@@ -44,9 +44,15 @@ bridgeit.camera( 'myId', callback, {postURL: '/upload'});
             row.setAttribute('class','row');
             photosElem.appendChild(row);
             var img = document.createElement('img');
-            img.setAttribute('src',  photos[i]);
+            img.setAttribute('src',  photos[i] + '?access_token=' + bridgeit.io.auth.getLastAccessToken());
             row.appendChild(img);
         }
+    }
+
+    function launchCamera(){
+        bridgeit.camera('cameraBtn','onAfterPhotoCapture', {
+            postURL: window.storageHub + '?access_token=' + bridgeit.io.auth.getLastAccessToken()
+        });
     }
 
     function onAfterPhotoCapture(event)  {
@@ -57,13 +63,15 @@ bridgeit.camera( 'myId', callback, {postURL: '/upload'});
             document.getElementById("currentPhotoDesc").innerHTML = "Last photo taken at " + new Date();
         }
         if (event.response)  {
-            var photo = JSON.parse(event.response);
-            console.log('response: ' + photo);
+            console.log('response: ' + event.response);
+            var cleanResponse = event.response.replace(/\+/g,'');
+            var jsonResp = JSON.parse(cleanResponse);
             var row = document.createElement('div');
             row.setAttribute('class','row');
             var elem = document.getElementById('images');
             elem.insertBefore(row,elem.firstChild);
-            row.innerHTML = "<a class='btn ui-btn ui-shadow ui-btn-corner-all ui-btn-up-c' onclick=\"loadPhoto(this,'" + photo + "');\">Load Photo</a>";
+            row.innerHTML = "<a class='btn ui-btn ui-shadow ui-btn-corner-all ui-btn-up-c' onclick=\"loadPhoto(this,'" + 
+                (jsonResp.uri || jsonResp.location ) + "');\">Load Photo</a>";
         }
     }
     function loadPhoto(photoLink, url){
@@ -71,7 +79,7 @@ bridgeit.camera( 'myId', callback, {postURL: '/upload'});
             var parent = photoLink.parentNode;
             parent.removeChild(photoLink);
             var img = document.createElement('img');
-            img.setAttribute('src',  url);
+            img.setAttribute('src',  url + '?access_token=' + bridgeit.io.auth.getLastAccessToken());
             parent.appendChild(img);
             setTimeout(function () {
                 storePhoto(url);

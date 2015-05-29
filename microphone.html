@@ -22,7 +22,7 @@ bridgeit.microphone('myId', callback, {postURL: '/upload'});
     </fieldset>
     
     <a id="micBtn" type="button" class="btn"
-        onclick="bridgeit.microphone('micBtn','onAfterAudioCapture', {postURL: window.echoHub + 'blob'});">Record Audio</a>
+        onclick="launchCamera();">Record Audio</a>
         
     <fieldset>
         <div class="row"></div>
@@ -41,7 +41,7 @@ bridgeit.microphone('myId', callback, {postURL: '/upload'});
                 row.setAttribute('class','row');
                 recordingsElem.appendChild(row);
                 var audioElem = document.createElement('audio');
-                audioElem.setAttribute('src', recordings[i]);
+                audioElem.setAttribute('src', recordings[i] + '?access_token=' + bridgeit.io.auth.getLastAccessToken());
                 audioElem.setAttribute('controls', 'controls');
                 audioElem.setAttribute('preload', 'auto');
                 audioElem.setAttribute('type', 'audio/mp3');
@@ -50,11 +50,18 @@ bridgeit.microphone('myId', callback, {postURL: '/upload'});
             }
         }
 
+        function launchCamera(){
+            bridgeit.microphone('micBtn','onAfterAudioCapture', {
+                postURL: window.storageHub + '?access_token=' + bridgeit.io.auth.getLastAccessToken()
+            });
+        }
+
         function onAfterAudioCapture(event)  {
             console.log('onAfterAudioCapture: ' + event);
             var text = event.value;
             if (event.response)  {
-                var audioSrc = JSON.parse(event.response);
+                var jsonResp = JSON.parse(event.response.replace(/\+/g,''));
+                var audioSrc = (jsonResp.location || jsonResp.uri );
                 console.log('response audio src: ' + audioSrc);
 
                 var row = document.createElement('div');
@@ -63,7 +70,7 @@ bridgeit.microphone('myId', callback, {postURL: '/upload'});
 
                 elem.insertBefore(row,elem.firstChild);
                 var audioElem = document.createElement('audio');
-                audioElem.setAttribute('src',  audioSrc);
+                audioElem.setAttribute('src',  audioSrc + '?access_token=' + bridgeit.io.auth.getLastAccessToken());
                 audioElem.setAttribute('controls', 'controls');
                 audioElem.setAttribute('preload', 'auto');
                 audioElem.setAttribute('type', 'audio/mp3');

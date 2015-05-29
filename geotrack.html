@@ -31,9 +31,9 @@ bridgeit.geoTrack('myId', callback, options);
     </fieldset>
     
     <a id="startTrackingBtn" type="button" class="btn" style="display: none"
-        onclick="bridgeit.geoTrack('tracker','onAfterTrackingStarted', {postURL: window.echoHub + 'list/geotrack-' + bridgeit.getId(), strategy:'significant',duration:0.3,_jguid:bridgeit.getId()});">Start Tracking</a>
+        onclick="launchGeoTrack();">Start Tracking</a>
     <a id="stopTrackingBtn" type="button" class="btn" style="display: none"
-        onclick="bridgeit.geoTrack('tracker','onAfterTrackingStopped', {postURL: window.echoHub + 'list/geotrack-' + bridgeit.getId(), strategy:'stop',_jguid:bridgeit.getId()});">
+        onclick="stopGeoTrack()">
         Stop Tracking
         <i class="icon-gear icon-spin geotracking"></i>
     </a>
@@ -66,6 +66,25 @@ bridgeit.geoTrack('myId', callback, options);
     
     var geoPushReady;
 
+    function launchGeoTrack(){
+        bridgeit.geoTrack('tracker','onAfterTrackingStarted', {
+            duration: 0.3,
+            _jguid: bridgeit.getId(),
+            postURL: window.docsHub + 'geotrack-' + bridgeit.getId() + 
+                '?access_token=' + bridgeit.io.auth.getLastAccessToken() 
+        });
+    }
+
+    function stopGeoTrack(){
+        bridgeit.geoTrack('tracker','onAfterTrackingStopped', {
+            strategy:'stop',
+            _jguid:bridgeit.getId(),
+            postURL: window.docsHub + 'geotrack-' + bridgeit.getId() + 
+                '?access_token=' + bridgeit.io.auth.getLastAccessToken() 
+        });
+    }
+
+
     function isGeoTrackRunning(){
         var result = false;
         if( window.localStorage && localStorage.getItem('bridgeit.geoTrackRunning') == 'true'){
@@ -89,7 +108,15 @@ bridgeit.geoTrack('myId', callback, options);
     refreshGeoTrackButtons(isGeoTrackRunning());
     
     if (!geoPushReady)  {
-        bridgeit.usePushService( window.pushHub, window.apiKey);
+        bridgeit.usePushService(window.pushHub, null, 
+            {
+                auth:{
+                    access_token: bridgeit.io.auth.getLastAccessToken()
+                },
+                account: account, 
+                realm: realm
+            }
+        );
         bridgeit.addPushListener("geotrack-" + bridgeit.getId(),
                 "onReceiveGeoTrackPush");
         geoPushReady = true;
@@ -183,7 +210,11 @@ bridgeit.geoTrack('myId', callback, options);
 
     function updateMarkers()  {
         console.log('geoTrack updateMarkers');
-        ajaxGet(window.echoHub + 'list/geotrack-' + bridgeit.getId(), processMarkers);
+        bridgeit.io.documents.findDocuments({
+            collection: 'geotrack-' + bridgeit.getId()
+        }).then(processMarkers).catch(function(err){
+            console.log((err ? err.message || err : 'Sorry, something bad happened trying to load the geo-marker documents from the server'));
+        });
     }
 
     function getTimestampFromGeoJson(geojson){
@@ -241,10 +272,9 @@ bridgeit.geoTrack('myId', callback, options);
         console.log('moved cursorMarker to ' + lat + ',' + lng);
     }
 
-    function processMarkers(data)  {
-        console.log('geoTrack processMarkers: data='+ data);
-        if (data){
-            var markerData = JSON.parse(data);
+    function processMarkers(markerData)  {
+        console.log('geoTrack processMarkers: data='+ JSON.stringify(markerData));
+        if (markerData){
             var len = markerData.length;
             var markersPlaced = false;
             var locations = {};
